@@ -7,6 +7,11 @@ export const ADDRESSES = {
 
 export const USDC_DECIMALS = 6;
 
+// Block where ElyPay was created. Open the contract on the explorer,
+// click the creation transaction, and copy its block number here.
+// Zero works, but the network may reject a search that wide.
+export const DEPLOY_BLOCK = BigInt(0);
+
 export const elyPayAbi = parseAbi([
   "function createLink(uint256 amount, string memo) returns (uint256 id)",
   "function pay(uint256 id, uint256 amount)",

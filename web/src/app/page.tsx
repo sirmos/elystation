@@ -13,26 +13,50 @@ const icon = {
   "aria-hidden": true,
 };
 
-const next = [
+const roadmap = [
   {
-    title: "Services directory",
-    text: "Find skilled people by category and city, and hire them in a few taps.",
-    status: "In development",
+    key: "live",
+    phase: "Live on testnet",
+    status: "Done",
+    items: [
+      "Payment links with an amount and a note",
+      "Pay page and public receipts",
+      "QR code and WhatsApp sharing",
+      "A 0.5% fee on each payment",
+    ],
   },
   {
-    title: "Pay when done",
-    text: "The contract holds your payment and releases it when the job is confirmed.",
-    status: "In development",
+    key: "dev",
+    phase: "In development",
+    status: "Building now",
+    items: [
+      "Services directory with profiles",
+      "Pay when done, held by the contract",
+      "Prices in your local currency",
+      "My links dashboard",
+    ],
   },
   {
-    title: "Prices in your currency",
-    text: "See every amount in your local currency before you pay.",
-    status: "In development",
+    key: "plan",
+    phase: "Planned",
+    status: "After the build",
+    items: [
+      "Elystation token, launching through Ascend",
+      "Lower fees for token holders",
+      "Telegram and Discord bots",
+      "Reviews and ratings",
+    ],
   },
   {
-    title: "Elystation token",
-    text: "Lower fees for holders. Launching through Ascend.",
-    status: "Planned",
+    key: "later",
+    phase: "Later",
+    status: "Exploring",
+    items: [
+      "Local currency to USDC through a licensed partner",
+      "Sign in with email",
+      "Help with disputes",
+      "Mobile app",
+    ],
   },
 ];
 
@@ -141,22 +165,46 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="next">
+        <section id="roadmap" className="roadmap">
           <div className="section-head">
-            <h2>What we are building next</h2>
-            <p>Payment links are the base. These are in progress.</p>
+            <h2>Roadmap</h2>
+            <p>
+              Payment links are the base. Here is what is live, what we are
+              building, and what comes after.
+            </p>
           </div>
-          <ul className="next-list">
-            {next.map((item) => (
-              <li key={item.title} className="next-row">
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
+          <div className="rm-track">
+            {roadmap.map((stop) => (
+              <div key={stop.key} className={`rm-col rm-${stop.key}`}>
+                <span className="rm-node">
+                  {stop.key === "live" && (
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#04201C"
+                      strokeWidth="3.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12l5 5 9-10" />
+                    </svg>
+                  )}
+                </span>
+                <div className="rm-card">
+                  <h3>{stop.phase}</h3>
+                  <p className="rm-status">{stop.status}</p>
+                  <ul className="rm-items">
+                    {stop.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
-                <span className="chip">{item.status}</span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </section>
 
         <section className="cta">

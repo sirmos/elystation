@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ConnectButton from "./ConnectButton";
 import Logo from "./Logo";
+import Nav from "./Nav";
 
 export default function Header() {
   return (
@@ -13,6 +14,7 @@ export default function Header() {
           <Link href="/" className="brand" aria-label="Home">
             <Logo />
           </Link>
+          <Nav />
           <ConnectButton />
         </div>
       </header>
