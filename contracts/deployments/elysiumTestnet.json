@@ -1,0 +1,8 @@
+{
+  "network": "elysiumTestnet",
+  "chainId": 99801,
+  "usdc": "0x4CD746962FEFEFfa2fcc5cced7B27BC47FE3890B",
+  "elyPay": "0x68Aa5b7A6A755b2FcfB1a94E253E4Ab92Ad9cBb4",
+  "deployer": "0x5dDdc8b57E08134A983Cb0802Cb9f197d197be8d",
+  "deployedAt": "2026-10-16T01:55:15.582Z"
+}
