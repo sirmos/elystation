@@ -32,7 +32,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
-        <div className="backdrop" aria-hidden="true" />
         <Providers>
           <Header />
           <main>{children}</main>

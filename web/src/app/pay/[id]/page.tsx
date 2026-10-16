@@ -10,8 +10,11 @@ export default async function PayPage({
   if (!/^\d{1,18}$/.test(id)) notFound();
 
   return (
-    <div className="pay-wrap">
-      <PayView id={id} />
-    </div>
+    <>
+      <div className="band" aria-hidden="true" />
+      <div className="pay-wrap">
+        <PayView id={id} />
+      </div>
+    </>
   );
 }
