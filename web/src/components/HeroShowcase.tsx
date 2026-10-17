@@ -13,6 +13,10 @@ function money(value: bigint) {
   });
 }
 
+function count(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
 export default function HeroShowcase() {
   const activity = useActivity();
   const latest = activity?.latest ?? null;
@@ -23,67 +27,78 @@ export default function HeroShowcase() {
 
   const note =
     activity && activity.payments > 0
-      ? `Live from Elysium testnet: ${activity.links} links, ${activity.payments} payments, ${money(activity.volume)} test USDC`
+      ? `Live from Elysium testnet: ${count(activity.links, "link", "links")}, ${count(activity.payments, "payment", "payments")}, ${money(activity.volume)} test USDC`
       : "Example";
 
   return (
-    <div className="showcase">
-      <div className="invoice invoice-glass mock mock-back" aria-hidden="true">
-        <div className="inv-head">
-          <span className="inv-title">Payment receipt</span>
-          <span className="status status-live">Paid</span>
+    <div>
+      <div className="showcase">
+        <div className="invoice invoice-glass mock mock-back" aria-hidden="true">
+          <div className="inv-head">
+            <span className="inv-title">Payment receipt</span>
+            <span className="status status-live">Paid</span>
+          </div>
+          <p className="inv-label">Amount paid</p>
+          <p className="amount">
+            {amount}
+            <span className="unit">USDC</span>
+          </p>
+          <dl className="inv-rows">
+            <div className="row">
+              <dt>Description</dt>
+              <dd>{memo}</dd>
+            </div>
+            <div className="row">
+              <dt>Fee</dt>
+              <dd>{fee}</dd>
+            </div>
+          </dl>
         </div>
-        <p className="inv-label">Amount paid</p>
-        <p className="amount">
-          {amount}
-          <span className="unit">USDC</span>
-        </p>
-        <dl className="inv-rows">
-          <div className="row">
-            <dt>Description</dt>
-            <dd>{memo}</dd>
+
+        <div className="invoice mock mock-front" aria-hidden="true">
+          <div className="inv-head">
+            <span className="inv-title">Payment request</span>
+            <span className="status">Example</span>
           </div>
-          <div className="row">
-            <dt>Fee</dt>
-            <dd>{fee}</dd>
+          <p className="inv-label">Amount due</p>
+          <p className="amount">
+            120.00<span className="unit">USDC</span>
+          </p>
+          <dl className="inv-rows">
+            <div className="row">
+              <dt>Description</dt>
+              <dd>Website design</dd>
+            </div>
+            <div className="row">
+              <dt>Network</dt>
+              <dd>Elysium Testnet</dd>
+            </div>
+          </dl>
+          <div className="share">
+            <div className="qr">
+              <QRCodeSVG
+                value="https://elystation.vercel.app"
+                size={84}
+                level="M"
+                bgColor="#FFFFFF"
+                fgColor="#0B1F1C"
+              />
+            </div>
+            <p className="url">Scan to pay, or open the link.</p>
           </div>
-        </dl>
+        </div>
       </div>
 
-      <div className="invoice mock mock-front" aria-hidden="true">
-        <div className="inv-head">
-          <span className="inv-title">Payment request</span>
-          <span className="status">Example</span>
-        </div>
-        <p className="inv-label">Amount due</p>
-        <p className="amount">
-          120.00<span className="unit">USDC</span>
-        </p>
-        <dl className="inv-rows">
-          <div className="row">
-            <dt>Description</dt>
-            <dd>Website design</dd>
-          </div>
-          <div className="row">
-            <dt>Network</dt>
-            <dd>Elysium Testnet</dd>
-          </div>
-        </dl>
-        <div className="share">
-          <div className="qr">
-            <QRCodeSVG
-              value="https://elystation.vercel.app"
-              size={84}
-              level="M"
-              bgColor="#FFFFFF"
-              fgColor="#0B1F1C"
-            />
-          </div>
-          <p className="url">Scan to pay, or open the link.</p>
-        </div>
-      </div>
-
-      <p className="showcase-note">{note}</p>
+      <p
+        style={{
+          marginTop: 14,
+          textAlign: "right",
+          fontSize: "0.75rem",
+          color: "var(--on-dark-muted)",
+        }}
+      >
+        {note}
+      </p>
     </div>
   );
 }

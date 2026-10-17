@@ -5,6 +5,8 @@ import { useState } from "react";
 
 const items = [
   { href: "/#create", label: "Create a link" },
+  { href: "/explore", label: "Explore" },
+  { href: "/profile", label: "Offer a service" },
   { href: "/#how", label: "How it works" },
   { href: "/#roadmap", label: "Roadmap" },
 ];
