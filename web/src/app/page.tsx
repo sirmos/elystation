@@ -19,10 +19,11 @@ const roadmap = [
     phase: "Live on testnet",
     status: "Done",
     items: [
-      "Payment links with an amount and a note",
+      "Payment links, QR code and WhatsApp sharing",
       "Pay page and public receipts",
-      "QR code and WhatsApp sharing",
-      "A 0.5% fee on each payment",
+      "Services directory with profiles",
+      "Pay when done, held by the contract",
+      "Dashboard for jobs, orders and links",
     ],
   },
   {
@@ -30,10 +31,10 @@ const roadmap = [
     phase: "In development",
     status: "Building now",
     items: [
-      "Services directory with profiles",
-      "Pay when done, held by the contract",
+      "Dispute help for pay when done",
+      "Unique handles for every profile",
       "Prices in your local currency",
-      "My links dashboard",
+      "Telegram alerts for new jobs",
     ],
   },
   {
@@ -43,8 +44,8 @@ const roadmap = [
     items: [
       "Elystation token, launching through Ascend",
       "Lower fees for token holders",
-      "Telegram and Discord bots",
       "Reviews and ratings",
+      "Discord bot",
     ],
   },
   {
@@ -54,7 +55,7 @@ const roadmap = [
     items: [
       "Local currency to USDC through a licensed partner",
       "Sign in with email",
-      "Help with disputes",
+      "Community panel for disputes",
       "Mobile app",
     ],
   },
@@ -69,7 +70,8 @@ export default function Home() {
             <h1>Send a link. Get paid in USDC.</h1>
             <p className="lede">
               Elystation turns a payment into a simple link with the amount,
-              the reason and a receipt. No sign up. We never hold your money.
+              the reason and a receipt. No sign up. We never hold your money
+              for payment links.
             </p>
             <div className="hero-cta">
               <a className="btn btn-mint" href="#create">
@@ -105,7 +107,7 @@ export default function Home() {
                   <path d="M9 12l2 2 4-4" />
                 </svg>
               </span>
-              <h3>Non-custodial</h3>
+              <h3>Non-custodial links</h3>
               <p>
                 Payments go from the payer wallet to yours. We never hold your
                 funds.

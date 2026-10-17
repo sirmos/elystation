@@ -14,6 +14,7 @@ import { elysiumTestnet } from "@/lib/chain";
 import { ADDRESSES, USDC_DECIMALS, elyMarketAbi } from "@/lib/contracts";
 import { feeOverrides } from "@/lib/gas";
 import { CATEGORIES, money } from "@/lib/market";
+import { useMyDeals } from "@/lib/useMyDeals";
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
@@ -45,6 +46,7 @@ function niceError(err: unknown) {
 export default function ProfileEditor() {
   const { address, isConnected, chainId } = useAccount();
   const publicClient = usePublicClient({ chainId: elysiumTestnet.id });
+  const { deals } = useMyDeals(address);
 
   const [form, setForm] = useState<Form>(empty);
   const [svcTitle, setSvcTitle] = useState("");
@@ -86,6 +88,9 @@ export default function ProfileEditor() {
   const hasProfile = !!stored && stored[6] > BigInt(0);
   const updatedAt = stored ? stored[6] : undefined;
   const services = servicesQuery.data ?? [];
+  const waiting = deals
+    ? deals.filter((d) => d.role === "provider" && d.status === 1).length
+    : 0;
 
   useEffect(() => {
     if (stored && stored[6] > BigInt(0)) {
@@ -232,6 +237,17 @@ export default function ProfileEditor() {
 
   return (
     <>
+      {waiting > 0 && (
+        <div className="callout">
+          <span>
+            You have {waiting} {waiting === 1 ? "job" : "jobs"} waiting for you.
+          </span>
+          <Link className="btn btn-primary btn-sm" href="/dashboard">
+            Open dashboard
+          </Link>
+        </div>
+      )}
+
       <form className="panel" onSubmit={saveProfile}>
         <h2>{hasProfile ? "Edit your profile" : "Create your profile"}</h2>
         <p className="panel-note">
@@ -350,7 +366,8 @@ export default function ProfileEditor() {
           <h2>Your services</h2>
           <p className="panel-note">
             Add up to 8 services with a fixed price in USDC. Customers pick one
-            and pay into the contract.
+            and pay into the contract. When someone hires you, it shows in your
+            dashboard.
           </p>
 
           {services.length > 0 && (

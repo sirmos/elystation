@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CATEGORIES, money } from "@/lib/market";
+import { CATEGORIES, money, shortAddress } from "@/lib/market";
 import { useProfiles } from "@/lib/useProfiles";
+import Avatar from "./Avatar";
 
 export default function Directory() {
   const { profiles, error } = useProfiles();
@@ -36,7 +37,7 @@ export default function Directory() {
   const q = query.trim().toLowerCase();
   const shown = profiles.filter((p) => {
     const inCategory = category === "All" || p.category === category;
-    const text = `${p.name} ${p.headline} ${p.city} ${p.category}`.toLowerCase();
+    const text = `${p.name} ${p.headline} ${p.city} ${p.category} ${p.address}`.toLowerCase();
     return inCategory && (!q || text.includes(q));
   });
 
@@ -45,7 +46,7 @@ export default function Directory() {
       <div className="filters">
         <input
           className="input search"
-          placeholder="Search by name, skill or city"
+          placeholder="Search by name, skill, city or wallet"
           aria-label="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -71,7 +72,15 @@ export default function Directory() {
         <div className="dir-grid">
           {shown.map((p) => (
             <Link key={p.address} href={`/u/${p.address}`} className="pcard">
-              <h3>{p.name}</h3>
+              <div className="pcard-top">
+                <Avatar address={p.address} name={p.name} />
+                <div>
+                  <h3>{p.name}</h3>
+                  <span className="addr" title={p.address}>
+                    {shortAddress(p.address)}
+                  </span>
+                </div>
+              </div>
               <p className="headline">{p.headline || "No headline yet"}</p>
               <div className="pmeta">
                 <span className="tag tag-mint">{p.category}</span>

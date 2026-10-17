@@ -202,7 +202,7 @@ export default function DealView({ id }: { id: string }) {
     help = "The money is held by the contract. When the job is done, mark it as delivered.";
   } else if (status === 2 && isCustomer) {
     help =
-      "The provider says the job is done. Release the payment, or wait. After the review time, the provider can be paid out.";
+      "The provider says the job is done. Release the payment, or wait. After the review time, the provider can be paid out. If something is wrong, ask the provider for a refund. Dispute help is planned.";
   } else if (status === 2 && isProvider) {
     help =
       "You marked this as delivered. You get paid when the customer releases, or after the review time ends.";
@@ -302,7 +302,11 @@ export default function DealView({ id }: { id: string }) {
               disabled={busy}
               onClick={() => run(a.fn)}
             >
-              {busy ? (signing ? "Confirm in your wallet" : "Waiting for confirmation") : a.label}
+              {busy
+                ? signing
+                  ? "Confirm in your wallet"
+                  : "Waiting for confirmation"
+                : a.label}
             </button>
           ))}
         </div>
@@ -313,6 +317,12 @@ export default function DealView({ id }: { id: string }) {
           {errorText}
         </p>
       )}
+
+      <div className="actions">
+        <Link className="btn btn-secondary btn-sm" href="/dashboard">
+          Back to your dashboard
+        </Link>
+      </div>
     </div>
   );
 }

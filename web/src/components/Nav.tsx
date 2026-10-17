@@ -1,18 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { dealHint, useMyDeals } from "@/lib/useMyDeals";
 
 const items = [
   { href: "/#create", label: "Create a link" },
   { href: "/explore", label: "Explore" },
   { href: "/profile", label: "Offer a service" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/#how", label: "How it works" },
   { href: "/#roadmap", label: "Roadmap" },
 ];
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const { address } = useAccount();
+  const { deals } = useMyDeals(address);
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const urgent = deals ? deals.filter((d) => dealHint(d, now).urgent).length : 0;
 
   return (
     <>
@@ -20,6 +33,11 @@ export default function Nav() {
         {items.map((item) => (
           <Link key={item.href} href={item.href}>
             {item.label}
+            {item.href === "/dashboard" && urgent > 0 && (
+              <span className="nav-badge" aria-label={`${urgent} need action`}>
+                {urgent}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
@@ -53,6 +71,9 @@ export default function Nav() {
           {items.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
               {item.label}
+              {item.href === "/dashboard" && urgent > 0 && (
+                <span className="nav-badge">{urgent}</span>
+              )}
             </Link>
           ))}
         </div>

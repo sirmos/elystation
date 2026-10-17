@@ -7,6 +7,7 @@ import type { Address } from "viem";
 import { elysiumTestnet } from "@/lib/chain";
 import { ADDRESSES, elyMarketAbi } from "@/lib/contracts";
 import { money, shortAddress } from "@/lib/market";
+import Avatar from "./Avatar";
 import HirePanel from "./HirePanel";
 
 export default function ProfileView({ address }: { address: Address }) {
@@ -89,12 +90,19 @@ export default function ProfileView({ address }: { address: Address }) {
   return (
     <>
       <div className="panel">
-        <div className="pv-head">
-          <div className="pmeta" style={{ marginBottom: 14 }}>
+        <div className="pcard-top" style={{ marginBottom: 16 }}>
+          <Avatar address={address} name={profile[0]} size={56} />
+          <div className="pmeta">
             <span className="tag tag-mint">{profile[2]}</span>
             {profile[3] && <span className="tag">{profile[3]}</span>}
           </div>
+        </div>
+
+        <div className="pv-head">
           <h1>{profile[0]}</h1>
+          <p className="addr" title={address} style={{ marginTop: 4 }}>
+            {shortAddress(address)}
+          </p>
           {profile[1] && <p className="headline">{profile[1]}</p>}
         </div>
 
@@ -115,7 +123,7 @@ export default function ProfileView({ address }: { address: Address }) {
         <dl className="inv-rows">
           <div className="row">
             <dt>Wallet</dt>
-            <dd>{shortAddress(address)}</dd>
+            <dd title={address}>{shortAddress(address)}</dd>
           </div>
           {profile[5] && (
             <div className="row">
@@ -129,6 +137,9 @@ export default function ProfileView({ address }: { address: Address }) {
           <div className="actions">
             <Link className="btn btn-secondary btn-sm" href="/profile">
               Edit profile and services
+            </Link>
+            <Link className="btn btn-secondary btn-sm" href="/dashboard">
+              Open dashboard
             </Link>
           </div>
         )}

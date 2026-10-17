@@ -1,0 +1,133 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { usePublicClient } from "wagmi";
+import type { Address } from "viem";
+import { elysiumTestnet } from "./chain";
+import { ADDRESSES, DEPLOY_BLOCK, elyMarketAbi } from "./contracts";
+
+export type MyDeal = {
+  id: bigint;
+  customer: Address;
+  provider: Address;
+  amount: bigint;
+  deadline: bigint;
+  reviewEnds: bigint;
+  status: number;
+  title: string;
+  role: "provider" | "customer";
+};
+
+export type Hint = { text: string; urgent: boolean };
+
+// Plain words for what each side should do next.
+export function dealHint(d: MyDeal, now: number): Hint {
+  const pastDeadline = now > Number(d.deadline);
+  const reviewOver = now >= Number(d.reviewEnds);
+
+  if (d.status === 1) {
+    if (d.role === "provider") {
+      return { text: "Booked. Do the job, then mark it delivered.", urgent: true };
+    }
+    return pastDeadline
+      ? { text: "The deadline passed. You can take your money back.", urgent: true }
+      : { text: "Waiting for the provider to deliver.", urgent: false };
+  }
+
+  if (d.status === 2) {
+    if (d.role === "customer") {
+      return { text: "Delivered. Check the work, then release the payment.", urgent: true };
+    }
+    return reviewOver
+      ? { text: "Review time ended. You can claim your payment.", urgent: true }
+      : { text: "Delivered. Waiting for the customer.", urgent: false };
+  }
+
+  if (d.status === 3) return { text: "Paid out.", urgent: false };
+  if (d.status === 4) return { text: "Refunded.", urgent: false };
+  return { text: "", urgent: false };
+}
+
+// Finds every deal where this wallet is the provider or the customer.
+export function useMyDeals(address?: Address) {
+  const client = usePublicClient({ chainId: elysiumTestnet.id });
+  const [deals, setDeals] = useState<MyDeal[] | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const c = client;
+    if (!c || !address) return;
+    const me = address;
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const [asProvider, asCustomer] = await Promise.all([
+          c!.getContractEvents({
+            address: ADDRESSES.elyMarket,
+            abi: elyMarketAbi,
+            eventName: "DealCreated",
+            args: { provider: me },
+            fromBlock: DEPLOY_BLOCK,
+            toBlock: "latest",
+          }),
+          c!.getContractEvents({
+            address: ADDRESSES.elyMarket,
+            abi: elyMarketAbi,
+            eventName: "DealCreated",
+            args: { customer: me },
+            fromBlock: DEPLOY_BLOCK,
+            toBlock: "latest",
+          }),
+        ]);
+
+        const ids = new Map<string, bigint>();
+        for (const log of [...asProvider, ...asCustomer]) {
+          if (log.args.id !== undefined) {
+            ids.set(log.args.id.toString(), log.args.id);
+          }
+        }
+
+        const list = await Promise.all(
+          Array.from(ids.values()).map(async (id) => {
+            const d = await c!.readContract({
+              address: ADDRESSES.elyMarket,
+              abi: elyMarketAbi,
+              functionName: "deals",
+              args: [id],
+            });
+            const item: MyDeal = {
+              id,
+              customer: d[0],
+              provider: d[1],
+              amount: d[2],
+              deadline: d[3],
+              reviewEnds: d[4],
+              status: Number(d[5]),
+              title: d[6],
+              role: d[1].toLowerCase() === me.toLowerCase() ? "provider" : "customer",
+            };
+            return item;
+          })
+        );
+
+        list.sort((a, b) => (a.id < b.id ? 1 : a.id > b.id ? -1 : 0));
+        if (!cancelled) {
+          setDeals(list);
+          setError(false);
+        }
+      } catch {
+        if (!cancelled) setError(true);
+      }
+    }
+
+    load();
+    const timer = setInterval(load, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [client, address]);
+
+  return { deals: address ? deals : null, error };
+}
