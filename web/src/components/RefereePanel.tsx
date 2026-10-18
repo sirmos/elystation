@@ -16,6 +16,7 @@ import { ADDRESSES, DEPLOY_BLOCK, elyMarketAbi } from "@/lib/contracts";
 import { feeOverrides } from "@/lib/gas";
 import { formatDate, money, shortAddress } from "@/lib/market";
 import { useDealLog } from "@/lib/useDealLog";
+import DealChat from "./DealChat";
 
 type Open = {
   id: bigint;
@@ -169,100 +170,120 @@ function DisputeCard({ item, onDone }: { item: Open; onDone: () => void }) {
   }
 
   return (
-    <div className="panel">
-      <div className="inv-head">
-        <span className="inv-title">Deal {item.id.toString()}</span>
-        <span className="status">In dispute</span>
-      </div>
-      <h1 className="deal-title">{item.title || "Service"}</h1>
-      <p className="amount">
-        {money(item.amount)}
-        <span className="unit">USDC</span>
-      </p>
+    <>
+      <div className="panel">
+        <div className="inv-head">
+          <span className="inv-title">Deal {item.id.toString()}</span>
+          <span className="status">In dispute</span>
+        </div>
+        <h1 className="deal-title">{item.title || "Service"}</h1>
+        <p className="amount">
+          {money(item.amount)}
+          <span className="unit">USDC</span>
+        </p>
 
-      <dl className="inv-rows">
-        <div className="row">
-          <dt>Customer</dt>
-          <dd>{shortAddress(item.customer)}</dd>
-        </div>
-        <div className="row">
-          <dt>Provider</dt>
-          <dd>{shortAddress(item.provider)}</dd>
-        </div>
-        <div className="row">
-          <dt>Decide by</dt>
-          <dd>{formatDate(item.resolveBy)}</dd>
-        </div>
-      </dl>
-
-      <h2 style={{ marginTop: 22 }}>Record</h2>
-      <div className="svc-list">
-        {log.length === 0 && <p className="panel-note">Loading</p>}
-        {log.map((e, i) => (
-          <div className="svc" key={i}>
-            <div>
-              <p className="svc-title">
-                {e.kind === "opened"
-                  ? "Reason from the customer"
-                  : e.by && e.by.toLowerCase() === item.customer.toLowerCase()
-                    ? "Evidence from the customer"
-                    : "Evidence from the provider"}
-              </p>
-              <p className="svc-price">{e.text}</p>
-            </div>
+        <dl className="inv-rows">
+          <div className="row">
+            <dt>Customer</dt>
+            <dd>{shortAddress(item.customer)}</dd>
           </div>
-        ))}
-      </div>
+          <div className="row">
+            <dt>Provider</dt>
+            <dd>{shortAddress(item.provider)}</dd>
+          </div>
+          <div className="row">
+            <dt>Decide by</dt>
+            <dd>{formatDate(item.resolveBy)}</dd>
+          </div>
+        </dl>
 
-      <div className="form-grid">
-        <div className="field">
-          <label htmlFor={`pct-${item.id}`}>
-            Provider gets {pct}%, customer gets {100 - pct}%
-          </label>
-          <input
-            id={`pct-${item.id}`}
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={pct}
-            onChange={(e) => setPct(Number(e.target.value))}
-            style={{ width: "100%", marginTop: 10 }}
-          />
-          <p className="hint">The fee applies only to the provider part.</p>
+        <h2 style={{ marginTop: 22 }}>Public record on the chain</h2>
+        <div className="svc-list">
+          {log.length === 0 && <p className="panel-note">Loading</p>}
+          {log.map((e, i) => (
+            <div className="svc" key={i}>
+              <div>
+                <p className="svc-title">
+                  {e.kind === "opened"
+                    ? "Reason from the customer"
+                    : e.by && e.by.toLowerCase() === item.customer.toLowerCase()
+                      ? "Public note from the customer"
+                      : "Public note from the provider"}
+                </p>
+                <p className="svc-price">{e.text}</p>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="field">
-          <label htmlFor={`ruling-${item.id}`}>Reason for your ruling</label>
-          <textarea
-            id={`ruling-${item.id}`}
-            className="input"
-            maxLength={300}
-            placeholder="A short reason. It is saved on the chain and shown on the deal page."
-            value={ruling}
-            onChange={(e) => setRuling(e.target.value)}
-          />
+        <div className="actions">
+          <Link
+            className="btn btn-secondary btn-sm"
+            href={`/deal/${item.id.toString()}`}
+          >
+            Open the deal page
+          </Link>
         </div>
-
-        {errorText && (
-          <p className="notice" role="alert">
-            {errorText}
-          </p>
-        )}
-
-        <button className="btn btn-primary" disabled={busy} onClick={send}>
-          {signing
-            ? "Confirm in your wallet"
-            : confirming
-              ? "Sending ruling"
-              : "Send ruling"}
-        </button>
-
-        <Link className="btn btn-secondary btn-sm" href={`/deal/${item.id.toString()}`}>
-          Open the deal page
-        </Link>
       </div>
-    </div>
+
+      <DealChat dealId={item.id.toString()} role="referee" status={5} />
+
+      <div className="panel">
+        <h2>Your ruling</h2>
+        <p className="panel-note">
+          Ask for more evidence in the messages first if you need it. When you
+          are ready, set the split and send your ruling.
+        </p>
+
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor={`pct-${item.id}`}>
+              Provider gets {pct}%, customer gets {100 - pct}%
+            </label>
+            <input
+              id={`pct-${item.id}`}
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={pct}
+              onChange={(e) => setPct(Number(e.target.value))}
+              style={{ width: "100%", marginTop: 10 }}
+            />
+            <p className="hint">The fee applies only to the provider part.</p>
+          </div>
+
+          <div className="field">
+            <label htmlFor={`ruling-${item.id}`}>Reason for your ruling</label>
+            <textarea
+              id={`ruling-${item.id}`}
+              className="input"
+              maxLength={300}
+              placeholder="A short reason. It is saved on the chain and shown on the deal page."
+              value={ruling}
+              onChange={(e) => {
+                setRuling(e.target.value);
+                setLocalError("");
+              }}
+            />
+          </div>
+
+          {errorText && (
+            <p className="notice" role="alert">
+              {errorText}
+            </p>
+          )}
+
+          <button className="btn btn-primary" disabled={busy} onClick={send}>
+            {signing
+              ? "Confirm in your wallet"
+              : confirming
+                ? "Sending ruling"
+                : "Send ruling"}
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 

@@ -46,7 +46,7 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
   const { switchChain, isPending: switching } = useSwitchChain();
   const publicClient = usePublicClient({ chainId: elysiumTestnet.id });
 
-  const [days, setDays] = useState(7);
+  const [deadlineSeconds, setDeadlineSeconds] = useState(604800);
   const [review, setReview] = useState<number | null>(null);
   const [lastAction, setLastAction] = useState<Action | null>(null);
   const [localError, setLocalError] = useState("");
@@ -178,7 +178,7 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
       }
       if (next === "create") {
         const block = await publicClient.getBlock();
-        const deadline = block.timestamp + BigInt(days * 86400);
+        const deadline = block.timestamp + BigInt(deadlineSeconds);
         writeContract({
           address: ADDRESSES.elyMarket,
           abi: elyMarketAbi,
@@ -278,15 +278,15 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
       <p className="hint">{title}</p>
 
       <div className="field">
-        <label htmlFor="days">Deadline for the provider to deliver</label>
+        <label htmlFor="deadline">Deadline for the provider to deliver</label>
         <select
-          id="days"
+          id="deadline"
           className="input select"
-          value={days}
-          onChange={(e) => setDays(Number(e.target.value))}
+          value={deadlineSeconds}
+          onChange={(e) => setDeadlineSeconds(Number(e.target.value))}
         >
           {DEADLINE_OPTIONS.map((o) => (
-            <option key={o.days} value={o.days}>
+            <option key={o.seconds} value={o.seconds}>
               {o.label}
             </option>
           ))}

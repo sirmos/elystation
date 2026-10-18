@@ -21,6 +21,7 @@ import {
   shortAddress,
 } from "@/lib/market";
 import { useDealLog } from "@/lib/useDealLog";
+import DealChat from "./DealChat";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -65,6 +66,13 @@ export default function DealView({ id }: { id: string }) {
     address: ADDRESSES.elyMarket,
     abi: elyMarketAbi,
     functionName: "feeBps",
+    chainId: elysiumTestnet.id,
+  });
+
+  const refereeQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "referee",
     chainId: elysiumTestnet.id,
   });
 
@@ -138,10 +146,21 @@ export default function DealView({ id }: { id: string }) {
 
   const isCustomer = !!address && address.toLowerCase() === customer.toLowerCase();
   const isProvider = !!address && address.toLowerCase() === provider.toLowerCase();
+  const referee = refereeQuery.data;
+  const isReferee =
+    !!address && !!referee && address.toLowerCase() === referee.toLowerCase();
   const busy = signing || confirming;
   const open = status === 1 || status === 2 || status === 5;
   const feeText =
     feeQuery.data !== undefined ? `${Number(feeQuery.data) / 100}%` : "-";
+
+  const chatRole = isCustomer
+    ? "customer"
+    : isProvider
+      ? "provider"
+      : isReferee && (status === 5 || status === 6)
+        ? "referee"
+        : null;
 
   const errorText =
     localError ||
@@ -277,9 +296,10 @@ export default function DealView({ id }: { id: string }) {
   let help = "Connect the wallet used in this deal to see your options.";
   if (status === 1 && isCustomer) {
     help =
-      "Your money is held by the contract. Release it when the job is done. If the provider does not deliver by the deadline, you can take it back.";
+      "Your money is held by the contract. Send the provider the job details below. Release the payment when the job is done. If the provider does not deliver by the deadline, you can take it back.";
   } else if (status === 1 && isProvider) {
-    help = "The money is held by the contract. When the job is done, mark it as delivered.";
+    help =
+      "The money is held by the contract. Check the job details below. When the job is done, mark it as delivered.";
   } else if (status === 2 && isCustomer) {
     help =
       "The provider says the job is done. Check the work. Release the payment, or open a dispute before the review time ends. If you do nothing, the provider is paid when it ends.";
@@ -288,7 +308,7 @@ export default function DealView({ id }: { id: string }) {
       "You marked this as delivered. You get paid when the customer releases, or when the review time ends.";
   } else if (status === 5) {
     help =
-      "A dispute is open. Both sides can add evidence. The referee decides how the money is split. If the referee does not decide in time, anyone can split it in half.";
+      "A dispute is open. Both sides can add evidence and write to the referee below. The referee decides how the money is split. If the referee does not decide in time, anyone can split it in half.";
   } else if (status === 6) {
     help = "The referee decided and the money has been sent.";
   } else if (status === 3) {
@@ -355,7 +375,7 @@ export default function DealView({ id }: { id: string }) {
         <dl className="inv-rows">
           <div className="row">
             <dt>Customer</dt>
-            <dd>{shortAddress(customer)}</dd>
+            <dd title={customer}>{shortAddress(customer)}</dd>
           </div>
           <div className="row">
             <dt>Provider</dt>
@@ -435,6 +455,8 @@ export default function DealView({ id }: { id: string }) {
         </div>
       </div>
 
+      {chatRole && <DealChat dealId={id} role={chatRole} status={status} />}
+
       {canDispute && (
         <div className="panel">
           <h2>Something wrong with the work?</h2>
@@ -452,7 +474,10 @@ export default function DealView({ id }: { id: string }) {
                 maxLength={300}
                 placeholder="For example: the car still does not start."
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={(e) => {
+                  setReason(e.target.value);
+                  setLocalError("");
+                }}
               />
             </div>
             <button
@@ -469,6 +494,10 @@ export default function DealView({ id }: { id: string }) {
       {(status === 5 || status === 6 || log.length > 0) && (
         <div className="panel">
           <h2>Dispute record</h2>
+          <p className="panel-note">
+            This record is saved on the chain, so it cannot be changed. Photos,
+            videos and messages are in the panel above.
+          </p>
           <div className="svc-list">
             {log.map((e, i) => (
               <div className="svc" key={i}>
@@ -479,8 +508,8 @@ export default function DealView({ id }: { id: string }) {
                       : e.kind === "ruling"
                         ? "Ruling by the referee"
                         : e.by && e.by.toLowerCase() === customer.toLowerCase()
-                          ? "Evidence from the customer"
-                          : "Evidence from the provider"}
+                          ? "Public note from the customer"
+                          : "Public note from the provider"}
                   </p>
                   <p className="svc-price">{e.text}</p>
                   {e.kind === "ruling" && e.shareBps !== undefined && (
@@ -496,14 +525,17 @@ export default function DealView({ id }: { id: string }) {
           {canAddEvidence && (
             <div className="form-grid">
               <div className="field">
-                <label htmlFor="note">Add evidence</label>
+                <label htmlFor="note">Add a public note (saved on the chain)</label>
                 <textarea
                   id="note"
                   className="input"
                   maxLength={300}
-                  placeholder="A short note, or a link to a photo or a message."
+                  placeholder="A short note. For photos and videos use Messages and files above."
                   value={note}
-                  onChange={(e) => setNote(e.target.value)}
+                  onChange={(e) => {
+                    setNote(e.target.value);
+                    setLocalError("");
+                  }}
                 />
               </div>
               <button
@@ -511,7 +543,7 @@ export default function DealView({ id }: { id: string }) {
                 disabled={busy}
                 onClick={addEvidence}
               >
-                {busy ? "Working" : "Add evidence"}
+                {busy ? "Working" : "Add public note"}
               </button>
             </div>
           )}

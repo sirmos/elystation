@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import "./market.css";
+import "./chat.css";
 import Providers from "./providers";
 import Header from "@/components/Header";
 import { ADDRESSES } from "@/lib/contracts";

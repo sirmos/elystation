@@ -14,18 +14,25 @@ export const CATEGORIES = [
   "Other",
 ];
 
+// How long the provider has to deliver.
 export const DEADLINE_OPTIONS = [
-  { label: "1 day", days: 1 },
-  { label: "3 days", days: 3 },
-  { label: "7 days", days: 7 },
-  { label: "14 days", days: 14 },
-  { label: "30 days", days: 30 },
+  { label: "1 hour", seconds: 3600 },
+  { label: "3 hours", seconds: 10800 },
+  { label: "6 hours", seconds: 21600 },
+  { label: "12 hours", seconds: 43200 },
+  { label: "1 day", seconds: 86400 },
+  { label: "3 days", seconds: 259200 },
+  { label: "7 days", seconds: 604800 },
+  { label: "14 days", seconds: 1209600 },
+  { label: "30 days", seconds: 2592000 },
 ];
 
 // How long the customer has to check the work after delivery.
 export const REVIEW_CHOICES = [
-  { label: "10 minutes (for demos)", seconds: 600 },
+  { label: "10 minutes", seconds: 600 },
+  { label: "30 minutes", seconds: 1800 },
   { label: "1 hour", seconds: 3600 },
+  { label: "6 hours", seconds: 21600 },
   { label: "1 day", seconds: 86400 },
   { label: "3 days", seconds: 259200 },
   { label: "7 days", seconds: 604800 },
