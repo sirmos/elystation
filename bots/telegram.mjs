@@ -10,7 +10,12 @@ export function startTelegram(token) {
   bot.command(COMMANDS, async (ctx) => {
     const name = ctx.msg.text.split(/\s+/)[0].replace("/", "").split("@")[0];
     try {
-      const text = await handleCommand("telegram", String(ctx.chat.id), name, (ctx.match || "").trim());
+      const text = await handleCommand(
+        "telegram",
+        String(ctx.chat.id),
+        name,
+        (ctx.match || "").trim()
+      );
       await ctx.reply(text.slice(0, 4000), options);
     } catch (e) {
       console.log("Telegram command failed:", e.message);
@@ -19,7 +24,12 @@ export function startTelegram(token) {
   });
 
   bot.catch((err) => console.log("Telegram error:", err.message));
-  bot.start({ onStart: () => console.log("Telegram bot is running.") });
 
-  return { send: (id, text) => bot.api.sendMessage(id, text.slice(0, 4000), options) };
+  bot
+    .start({ onStart: () => console.log("Telegram bot is running.") })
+    .catch((e) => console.log("Telegram stopped:", e.message));
+
+  return {
+    send: (id, text) => bot.api.sendMessage(id, text.slice(0, 4000), options),
+  };
 }

@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Newsreader, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import "./market.css";
 import "./chat.css";
+import "./ascend.css";
 import Providers from "./providers";
 import Header from "@/components/Header";
 import { ADDRESSES } from "@/lib/contracts";
 import { BRAND } from "@/lib/brand";
+import { LINKS } from "@/lib/links";
 
 const display = Newsreader({
   subsets: ["latin"],
@@ -21,10 +24,8 @@ const body = Hanken_Grotesk({
 export const metadata: Metadata = {
   title: `${BRAND.name}: ${BRAND.tagline}`,
   description:
-    "Create a payment link, share it anywhere, and get paid in USDC straight to your wallet.",
+    "Payment links and pay-when-done hiring in USDC on Elysium. Built for the Ascend Builder Competition.",
 };
-
-const explorer = "https://elysium.kinetiq.xyz/testnet-explorer";
 
 export default function RootLayout({
   children,
@@ -39,16 +40,30 @@ export default function RootLayout({
           <main>{children}</main>
           <footer className="footer">
             <div className="wrap footer-inner">
-              <span>{BRAND.name} on Elysium testnet</span>
+              <span>
+                {BRAND.name} on Elysium testnet. Built for the Ascend Builder
+                Competition.
+              </span>
               <span className="footer-links">
+                <Link href="/token">Token plan</Link>
+                <Link href="/#roadmap">Roadmap</Link>
+                <a href={LINKS.discord} target="_blank" rel="noreferrer">
+                  Discord
+                </a>
+                <a href={LINKS.telegramBot} target="_blank" rel="noreferrer">
+                  Telegram bot
+                </a>
+                <a href={LINKS.github} target="_blank" rel="noreferrer">
+                  GitHub
+                </a>
                 <a
-                  href={`${explorer}/address/${ADDRESSES.elyPay}`}
+                  href={`${LINKS.explorer}/address/${ADDRESSES.elyMarket}`}
                   target="_blank"
                   rel="noreferrer"
                 >
                   Contract
                 </a>
-                <a href={explorer} target="_blank" rel="noreferrer">
+                <a href={LINKS.explorer} target="_blank" rel="noreferrer">
                   Explorer
                 </a>
               </span>

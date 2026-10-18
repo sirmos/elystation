@@ -16,12 +16,14 @@ import type { Address } from "viem";
 import { elysiumTestnet } from "@/lib/chain";
 import { ADDRESSES, elyMarketAbi, usdcAbi } from "@/lib/contracts";
 import { feeOverrides } from "@/lib/gas";
+import { LINKS } from "@/lib/links";
 import {
   DEADLINE_OPTIONS,
   REVIEW_CHOICES,
   formatDuration,
   money,
 } from "@/lib/market";
+import DurationPicker from "./DurationPicker";
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
@@ -231,7 +233,15 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
         </button>
         <p className="hint">
           Test USDC is free on this testnet. You also need a little HYPE for
-          network fees.
+          network fees.{" "}
+          <a
+            href={LINKS.faucet}
+            target="_blank"
+            rel="noreferrer"
+            style={{ textDecoration: "underline" }}
+          >
+            Get free test HYPE
+          </a>
         </p>
       </>
     );
@@ -277,45 +287,27 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
       </div>
       <p className="hint">{title}</p>
 
-      <div className="field">
-        <label htmlFor="deadline">Deadline for the provider to deliver</label>
-        <select
-          id="deadline"
-          className="input select"
-          value={deadlineSeconds}
-          onChange={(e) => setDeadlineSeconds(Number(e.target.value))}
-        >
-          {DEADLINE_OPTIONS.map((o) => (
-            <option key={o.seconds} value={o.seconds}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <p className="hint">
-          If the job is not delivered by then, you can take your money back.
-        </p>
-      </div>
+      <DurationPicker
+        id="deadline"
+        label="Deadline for the provider to deliver"
+        hint="If the job is not delivered by then, you can take your money back."
+        options={DEADLINE_OPTIONS}
+        value={deadlineSeconds}
+        onChange={setDeadlineSeconds}
+        min={300}
+        max={90 * 86400}
+      />
 
-      <div className="field">
-        <label htmlFor="review">Your review time after delivery</label>
-        <select
-          id="review"
-          className="input select"
-          value={chosen}
-          onChange={(e) => setReview(Number(e.target.value))}
-        >
-          {options.map((o) => (
-            <option key={o.seconds} value={o.seconds}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <p className="hint">
-          After the provider marks the job delivered, you have this long to
-          check the work. You can release the payment or open a dispute. If you
-          do nothing, the provider is paid when the time ends.
-        </p>
-      </div>
+      <DurationPicker
+        id="review"
+        label="Your review time after delivery"
+        hint="After the provider marks the job delivered, you have this long to check the work. You can release the payment or open a dispute. If you do nothing, the provider is paid when the time ends."
+        options={options}
+        value={chosen}
+        onChange={setReview}
+        min={minSec}
+        max={maxSec}
+      />
 
       <dl className="inv-rows">
         <div className="row">
@@ -325,6 +317,10 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
         <div className="row">
           <dt>Fee when paid out</dt>
           <dd>{feeText}</dd>
+        </div>
+        <div className="row">
+          <dt>Deadline to deliver</dt>
+          <dd>{formatDuration(deadlineSeconds)}</dd>
         </div>
         <div className="row">
           <dt>Review time</dt>

@@ -8,6 +8,9 @@ export const CATEGORIES = [
   "Writing",
   "Tutoring",
   "Development",
+  "Smart contracts and security",
+  "Community and moderation",
+  "Marketing",
   "Photography",
   "Translation",
   "Cleaning",
@@ -16,6 +19,7 @@ export const CATEGORIES = [
 
 // How long the provider has to deliver.
 export const DEADLINE_OPTIONS = [
+  { label: "30 minutes", seconds: 1800 },
   { label: "1 hour", seconds: 3600 },
   { label: "3 hours", seconds: 10800 },
   { label: "6 hours", seconds: 21600 },

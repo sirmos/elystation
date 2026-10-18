@@ -1,3 +1,4 @@
+import FaucetNote from "@/components/FaucetNote";
 import ProfileEditor from "@/components/ProfileEditor";
 
 export default function ProfilePage() {
@@ -13,6 +14,7 @@ export default function ProfilePage() {
         </div>
       </section>
       <div className="wrap narrow page-lift">
+        <FaucetNote />
         <ProfileEditor />
       </div>
     </>

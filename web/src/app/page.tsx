@@ -1,5 +1,7 @@
+import Link from "next/link";
 import CreateLinkForm from "@/components/CreateLinkForm";
 import HeroShowcase from "@/components/HeroShowcase";
+import { LINKS } from "@/lib/links";
 
 const icon = {
   width: 22,
@@ -21,9 +23,10 @@ const roadmap = [
     items: [
       "Payment links, QR code and WhatsApp sharing",
       "Pay page and public receipts",
-      "Services directory with profiles",
-      "Pay when done, held by the contract",
-      "Dashboard for jobs, orders and links",
+      "Services directory with profiles and unique handles",
+      "Pay when done, with disputes and a referee",
+      "Private messages, photos and videos for each deal",
+      "Dashboard and a token page with live usage",
     ],
   },
   {
@@ -31,10 +34,10 @@ const roadmap = [
     phase: "In development",
     status: "Building now",
     items: [
-      "Dispute help for pay when done",
-      "Unique handles for every profile",
+      "Telegram and Discord alerts, hosted all day",
       "Prices in your local currency",
-      "Telegram alerts for new jobs",
+      "Reviews and ratings",
+      "A referee panel instead of one wallet",
     ],
   },
   {
@@ -42,10 +45,10 @@ const roadmap = [
     phase: "Planned",
     status: "After the build",
     items: [
-      "Elystation token, launching through Ascend",
+      "Elystation token (ELYST), launching through Ascend",
       "Lower fees for token holders",
-      "Reviews and ratings",
-      "Discord bot",
+      "Part of the fees to support the token",
+      "A plugin for AI agents, through PayBox",
     ],
   },
   {
@@ -70,16 +73,16 @@ export default function Home() {
             <h1>Send a link. Get paid in USDC.</h1>
             <p className="lede">
               Elystation turns a payment into a simple link with the amount,
-              the reason and a receipt. No sign up. We never hold your money
-              for payment links.
+              the reason and a receipt. Hire people with your money held until
+              the job is done. Built on Elysium for the Ascend ecosystem.
             </p>
             <div className="hero-cta">
               <a className="btn btn-mint" href="#create">
                 Create a link
               </a>
-              <a className="btn btn-ghost" href="#how">
-                See how it works
-              </a>
+              <Link className="btn btn-ghost" href="/explore">
+                Find someone to hire
+              </Link>
             </div>
           </div>
           <HeroShowcase />
@@ -164,6 +167,74 @@ export default function Home() {
                 get a receipt.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section id="ascend" className="ascend">
+          <div className="section-head">
+            <h2>Built for Ascend on Elysium</h2>
+            <p>
+              Ascend launches tokens on Elysium and supports them after launch.
+              Elystation is built to launch through Ascend, and to bring the
+              kind of activity Ascend looks for.
+            </p>
+          </div>
+          <div className="asc-grid">
+            <div className="asc-item">
+              <h3>One asset: USDC</h3>
+              <p>
+                Payments, deals and fees are all in USDC, the asset Ascend
+                launch pools trade against. People who earn it here already
+                hold what they need to buy tokens launched through Ascend.
+              </p>
+            </div>
+            <div className="asc-item">
+              <h3>A hiring layer for builders</h3>
+              <p>
+                Teams that launch on Ascend need designers, developers,
+                moderators and marketers. Hire them here and pay in USDC, with
+                the money held until the work is done.
+              </p>
+            </div>
+            <div className="asc-item">
+              <h3>Usage anyone can check</h3>
+              <p>
+                Every payment and job is public on the chain. Ascend looks at
+                holders, volume and clean distribution. Our token page shows
+                our live numbers.
+              </p>
+            </div>
+          </div>
+          <ol className="life">
+            <li className="life-step">
+              <strong>Launch</strong>
+              Planned. A USDC pool, with the allocation published first.
+            </li>
+            <li className="life-step">
+              <strong>Ascended</strong>
+              Holders, volume and clean distribution.
+            </li>
+            <li className="life-step">
+              <strong>HyperCore spot</strong>
+              Part of our creator fee set aside for the listing.
+            </li>
+            <li className="life-step">
+              <strong>HIP-3 perps</strong>
+              Later, once spot liquidity exists.
+            </li>
+          </ol>
+          <div className="asc-actions">
+            <Link className="btn btn-primary" href="/token">
+              See our token plan
+            </Link>
+            <a
+              className="btn btn-secondary"
+              href={LINKS.ascend}
+              target="_blank"
+              rel="noreferrer"
+            >
+              About Ascend
+            </a>
           </div>
         </section>
 
