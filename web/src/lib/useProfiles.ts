@@ -9,6 +9,7 @@ import { ADDRESSES, DEPLOY_BLOCK, elyMarketAbi } from "./contracts";
 export type ProfileCard = {
   address: Address;
   name: string;
+  handle: string;
   headline: string;
   category: string;
   city: string;
@@ -49,7 +50,7 @@ export function useProfiles() {
 
         const cards = await Promise.all(
           providers.map(async (addr) => {
-            const [p, services, jobs] = await Promise.all([
+            const [p, services, jobs, handle] = await Promise.all([
               c!.readContract({
                 address: ADDRESSES.elyMarket,
                 abi: elyMarketAbi,
@@ -68,6 +69,12 @@ export function useProfiles() {
                 functionName: "jobsCompleted",
                 args: [addr],
               }),
+              c!.readContract({
+                address: ADDRESSES.elyMarket,
+                abi: elyMarketAbi,
+                functionName: "handleOf",
+                args: [addr],
+              }),
             ]);
 
             let fromPrice: bigint | null = null;
@@ -80,6 +87,7 @@ export function useProfiles() {
             return {
               address: addr,
               name: p[0],
+              handle,
               headline: p[1],
               category: p[2],
               city: p[3],

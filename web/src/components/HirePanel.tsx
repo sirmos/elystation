@@ -16,7 +16,12 @@ import type { Address } from "viem";
 import { elysiumTestnet } from "@/lib/chain";
 import { ADDRESSES, elyMarketAbi, usdcAbi } from "@/lib/contracts";
 import { feeOverrides } from "@/lib/gas";
-import { DEADLINE_OPTIONS, formatDuration, money } from "@/lib/market";
+import {
+  DEADLINE_OPTIONS,
+  REVIEW_CHOICES,
+  formatDuration,
+  money,
+} from "@/lib/market";
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
@@ -42,6 +47,7 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
   const publicClient = usePublicClient({ chainId: elysiumTestnet.id });
 
   const [days, setDays] = useState(7);
+  const [review, setReview] = useState<number | null>(null);
   const [lastAction, setLastAction] = useState<Action | null>(null);
   const [localError, setLocalError] = useState("");
 
@@ -70,10 +76,17 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
     chainId: elysiumTestnet.id,
   });
 
-  const windowQuery = useReadContract({
+  const minQuery = useReadContract({
     address: ADDRESSES.elyMarket,
     abi: elyMarketAbi,
-    functionName: "reviewWindow",
+    functionName: "minReview",
+    chainId: elysiumTestnet.id,
+  });
+
+  const maxQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "maxReview",
     chainId: elysiumTestnet.id,
   });
 
@@ -109,6 +122,18 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txHash]);
 
+  const minSec = minQuery.data !== undefined ? Number(minQuery.data) : 60;
+  const maxSec = maxQuery.data !== undefined ? Number(maxQuery.data) : 14 * 86400;
+  const choices = REVIEW_CHOICES.filter(
+    (c) => c.seconds >= minSec && c.seconds <= maxSec
+  );
+  const options =
+    choices.length > 0
+      ? choices
+      : [{ label: formatDuration(minSec), seconds: minSec }];
+  const chosen =
+    review ?? (options.find((o) => o.seconds === 259200)?.seconds ?? options[0].seconds);
+
   const balance = balanceQuery.data ?? BigInt(0);
   const allowance = allowanceQuery.data ?? BigInt(0);
   const wrongChain = isConnected && chainId !== elysiumTestnet.id;
@@ -116,10 +141,6 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
   const busyLabel = signing ? "Confirm in your wallet" : "Waiting for confirmation";
   const feeText =
     feeQuery.data !== undefined ? `${Number(feeQuery.data) / 100}%` : "-";
-  const windowText =
-    windowQuery.data !== undefined
-      ? formatDuration(Number(windowQuery.data))
-      : "-";
 
   const errorText =
     localError ||
@@ -162,7 +183,7 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
           address: ADDRESSES.elyMarket,
           abi: elyMarketAbi,
           functionName: "createDeal",
-          args: [provider, price, title, deadline],
+          args: [provider, price, title, deadline, BigInt(chosen)],
           chainId: elysiumTestnet.id,
           ...fees,
         });
@@ -275,6 +296,27 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
         </p>
       </div>
 
+      <div className="field">
+        <label htmlFor="review">Your review time after delivery</label>
+        <select
+          id="review"
+          className="input select"
+          value={chosen}
+          onChange={(e) => setReview(Number(e.target.value))}
+        >
+          {options.map((o) => (
+            <option key={o.seconds} value={o.seconds}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <p className="hint">
+          After the provider marks the job delivered, you have this long to
+          check the work. You can release the payment or open a dispute. If you
+          do nothing, the provider is paid when the time ends.
+        </p>
+      </div>
+
       <dl className="inv-rows">
         <div className="row">
           <dt>Held by the contract</dt>
@@ -285,8 +327,8 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
           <dd>{feeText}</dd>
         </div>
         <div className="row">
-          <dt>Review time after delivery</dt>
-          <dd>{windowText}</dd>
+          <dt>Review time</dt>
+          <dd>{formatDuration(chosen)}</dd>
         </div>
       </dl>
 

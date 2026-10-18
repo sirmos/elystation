@@ -14,6 +14,7 @@ export type Activity = {
 
 // Reads link and payment events from the ElyPay contract.
 // Returns null when nothing can be read, so the page can show an example.
+// It refreshes every 10 seconds and when the tab becomes visible again.
 export function useActivity() {
   const client = usePublicClient({ chainId: elysiumTestnet.id });
   const [data, setData] = useState<Activity | null>(null);
@@ -67,11 +68,18 @@ export function useActivity() {
       }
     }
 
+    function onVisible() {
+      if (document.visibilityState === "visible") load();
+    }
+
     load();
-    const timer = setInterval(load, 30000);
+    const timer = setInterval(load, 10000);
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       cancelled = true;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [client]);
 

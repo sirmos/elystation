@@ -13,7 +13,7 @@ import { BaseError, parseUnits } from "viem";
 import { elysiumTestnet } from "@/lib/chain";
 import { ADDRESSES, USDC_DECIMALS, elyMarketAbi } from "@/lib/contracts";
 import { feeOverrides } from "@/lib/gas";
-import { CATEGORIES, money } from "@/lib/market";
+import { CATEGORIES, HANDLE_PATTERN, handleKey, money } from "@/lib/market";
 import { useMyDeals } from "@/lib/useMyDeals";
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
@@ -51,6 +51,7 @@ export default function ProfileEditor() {
   const [form, setForm] = useState<Form>(empty);
   const [svcTitle, setSvcTitle] = useState("");
   const [svcPrice, setSvcPrice] = useState("");
+  const [handle, setHandle] = useState("");
   const [localError, setLocalError] = useState("");
 
   const profileQuery = useReadContract({
@@ -71,6 +72,26 @@ export default function ProfileEditor() {
     query: { enabled: !!address },
   });
 
+  const handleQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "handleOf",
+    args: [address ?? ZERO],
+    chainId: elysiumTestnet.id,
+    query: { enabled: !!address },
+  });
+
+  const handleValid = HANDLE_PATTERN.test(handle);
+
+  const ownerQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "handleOwner",
+    args: [handleKey(handle)],
+    chainId: elysiumTestnet.id,
+    query: { enabled: handleValid },
+  });
+
   const {
     writeContract,
     data: hash,
@@ -88,9 +109,18 @@ export default function ProfileEditor() {
   const hasProfile = !!stored && stored[6] > BigInt(0);
   const updatedAt = stored ? stored[6] : undefined;
   const services = servicesQuery.data ?? [];
+  const currentHandle = handleQuery.data ?? "";
   const waiting = deals
     ? deals.filter((d) => d.role === "provider" && d.status === 1).length
     : 0;
+
+  const takenBy = ownerQuery.data;
+  const taken =
+    handleValid &&
+    !!takenBy &&
+    takenBy !== ZERO &&
+    takenBy.toLowerCase() !== (address ?? "").toLowerCase();
+  const isCurrent = handle === currentHandle;
 
   useEffect(() => {
     if (stored && stored[6] > BigInt(0)) {
@@ -113,8 +143,10 @@ export default function ProfileEditor() {
     if (!receipt) return;
     profileQuery.refetch();
     servicesQuery.refetch();
+    handleQuery.refetch();
     setSvcTitle("");
     setSvcPrice("");
+    setHandle("");
     // Run once for each confirmed transaction.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [txHash]);
@@ -163,6 +195,21 @@ export default function ProfileEditor() {
             contact: form.contact.trim(),
           },
         ],
+        chainId: elysiumTestnet.id,
+        ...fees,
+      })
+    );
+  }
+
+  function claimHandle(e: React.FormEvent) {
+    e.preventDefault();
+    if (!handleValid || taken) return;
+    send((fees) =>
+      writeContract({
+        address: ADDRESSES.elyMarket,
+        abi: elyMarketAbi,
+        functionName: "claimHandle",
+        args: [handle],
         chainId: elysiumTestnet.id,
         ...fees,
       })
@@ -233,6 +280,19 @@ export default function ProfileEditor() {
         </p>
       </div>
     );
+  }
+
+  let handleNote = "Letters, numbers and underscore. 3 to 20 characters.";
+  if (handle && !handleValid) {
+    handleNote = "Use only lowercase letters, numbers and underscore, 3 to 20 characters.";
+  } else if (handleValid && ownerQuery.isLoading) {
+    handleNote = "Checking";
+  } else if (taken) {
+    handleNote = "Someone already has this handle.";
+  } else if (handleValid && isCurrent) {
+    handleNote = "This is already your handle.";
+  } else if (handleValid) {
+    handleNote = "Available.";
   }
 
   return (
@@ -360,6 +420,41 @@ export default function ProfileEditor() {
           )}
         </div>
       </form>
+
+      {hasProfile && (
+        <form className="panel" onSubmit={claimHandle}>
+          <h2>Your handle</h2>
+          <p className="panel-note">
+            {currentHandle
+              ? `Your handle is @${currentHandle}. Your profile link is /h/${currentHandle}. You can change it. The old one becomes free.`
+              : "A short unique name, like @adetukunbo. People can find you and share your profile with it."}
+          </p>
+          <div className="form-grid">
+            <div className="field">
+              <label htmlFor="handle">Handle</label>
+              <div className="amount-wrap">
+                <span>@</span>
+                <input
+                  id="handle"
+                  autoComplete="off"
+                  maxLength={20}
+                  placeholder="adetukunbo"
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value.toLowerCase())}
+                />
+              </div>
+              <p className="hint">{handleNote}</p>
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={busy || !handleValid || taken || isCurrent}
+            >
+              {busy ? "Working" : "Claim handle"}
+            </button>
+          </div>
+        </form>
+      )}
 
       {hasProfile && (
         <section className="panel">

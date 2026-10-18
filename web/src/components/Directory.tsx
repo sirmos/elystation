@@ -34,10 +34,11 @@ export default function Directory() {
     );
   }
 
-  const q = query.trim().toLowerCase();
+  const q = query.trim().toLowerCase().replace(/^@/, "");
   const shown = profiles.filter((p) => {
     const inCategory = category === "All" || p.category === category;
-    const text = `${p.name} ${p.headline} ${p.city} ${p.category} ${p.address}`.toLowerCase();
+    const text =
+      `${p.name} ${p.handle} ${p.headline} ${p.city} ${p.category} ${p.address}`.toLowerCase();
     return inCategory && (!q || text.includes(q));
   });
 
@@ -46,7 +47,7 @@ export default function Directory() {
       <div className="filters">
         <input
           className="input search"
-          placeholder="Search by name, skill, city or wallet"
+          placeholder="Search by name, @handle, skill or city"
           aria-label="Search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -77,7 +78,7 @@ export default function Directory() {
                 <div>
                   <h3>{p.name}</h3>
                   <span className="addr" title={p.address}>
-                    {shortAddress(p.address)}
+                    {p.handle ? `@${p.handle}` : shortAddress(p.address)}
                   </span>
                 </div>
               </div>

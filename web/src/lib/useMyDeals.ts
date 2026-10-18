@@ -12,7 +12,9 @@ export type MyDeal = {
   provider: Address;
   amount: bigint;
   deadline: bigint;
+  reviewSeconds: bigint;
   reviewEnds: bigint;
+  resolveBy: bigint;
   status: number;
   title: string;
   role: "provider" | "customer";
@@ -36,7 +38,10 @@ export function dealHint(d: MyDeal, now: number): Hint {
 
   if (d.status === 2) {
     if (d.role === "customer") {
-      return { text: "Delivered. Check the work, then release the payment.", urgent: true };
+      return {
+        text: "Delivered. Check the work, then release the payment or open a dispute.",
+        urgent: true,
+      };
     }
     return reviewOver
       ? { text: "Review time ended. You can claim your payment.", urgent: true }
@@ -45,6 +50,17 @@ export function dealHint(d: MyDeal, now: number): Hint {
 
   if (d.status === 3) return { text: "Paid out.", urgent: false };
   if (d.status === 4) return { text: "Refunded.", urgent: false };
+
+  if (d.status === 5) {
+    return now >= Number(d.resolveBy)
+      ? {
+          text: "The referee did not answer in time. Anyone can split the money in half.",
+          urgent: true,
+        }
+      : { text: "In dispute. Add evidence. The referee will decide.", urgent: true };
+  }
+
+  if (d.status === 6) return { text: "Resolved by the referee.", urgent: false };
   return { text: "", urgent: false };
 }
 
@@ -102,9 +118,11 @@ export function useMyDeals(address?: Address) {
               provider: d[1],
               amount: d[2],
               deadline: d[3],
-              reviewEnds: d[4],
-              status: Number(d[5]),
-              title: d[6],
+              reviewSeconds: d[4],
+              reviewEnds: d[5],
+              resolveBy: d[6],
+              status: Number(d[7]),
+              title: d[8],
               role: d[1].toLowerCase() === me.toLowerCase() ? "provider" : "customer",
             };
             return item;

@@ -91,7 +91,8 @@ export default function HeroShowcase() {
 
       <p
         style={{
-          marginTop: 14,
+          position: "relative",
+          marginTop: 56,
           textAlign: "right",
           fontSize: "0.75rem",
           color: "var(--on-dark-muted)",

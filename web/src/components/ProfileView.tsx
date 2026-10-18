@@ -46,6 +46,30 @@ export default function ProfileView({ address }: { address: Address }) {
     chainId: elysiumTestnet.id,
   });
 
+  const handleQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "handleOf",
+    args: [address],
+    chainId: elysiumTestnet.id,
+  });
+
+  const openedQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "disputesOpened",
+    args: [address],
+    chainId: elysiumTestnet.id,
+  });
+
+  const lostQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "disputesLost",
+    args: [address],
+    chainId: elysiumTestnet.id,
+  });
+
   if (profileQuery.isLoading) {
     return (
       <div className="panel">
@@ -85,6 +109,9 @@ export default function ProfileView({ address }: { address: Address }) {
   const services = (servicesQuery.data ?? []).filter((s) => s.active);
   const jobs = jobsQuery.data ?? 0;
   const earned = earnedQuery.data ?? BigInt(0);
+  const handle = handleQuery.data ?? "";
+  const opened = openedQuery.data ?? 0;
+  const lost = lostQuery.data ?? 0;
   const selected = hireIndex !== null ? services[hireIndex] : undefined;
 
   return (
@@ -101,7 +128,7 @@ export default function ProfileView({ address }: { address: Address }) {
         <div className="pv-head">
           <h1>{profile[0]}</h1>
           <p className="addr" title={address} style={{ marginTop: 4 }}>
-            {shortAddress(address)}
+            {handle ? `@${handle}` : shortAddress(address)}
           </p>
           {profile[1] && <p className="headline">{profile[1]}</p>}
         </div>
@@ -117,6 +144,14 @@ export default function ProfileView({ address }: { address: Address }) {
             <strong>{money(earned)}</strong>
             <span>USDC earned through Elystation</span>
           </div>
+          <div className="stat">
+            <strong>{lost}</strong>
+            <span>{lost === 1 ? "dispute lost" : "disputes lost"}</span>
+          </div>
+          <div className="stat">
+            <strong>{opened}</strong>
+            <span>{opened === 1 ? "dispute opened" : "disputes opened"}</span>
+          </div>
         </div>
         <p className="hint">These numbers come straight from the chain.</p>
 
@@ -125,6 +160,12 @@ export default function ProfileView({ address }: { address: Address }) {
             <dt>Wallet</dt>
             <dd title={address}>{shortAddress(address)}</dd>
           </div>
+          {handle && (
+            <div className="row">
+              <dt>Profile link</dt>
+              <dd>/h/{handle}</dd>
+            </div>
+          )}
           {profile[5] && (
             <div className="row">
               <dt>Contact</dt>

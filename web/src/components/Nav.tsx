@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
+import { elysiumTestnet } from "@/lib/chain";
+import { ADDRESSES, elyMarketAbi } from "@/lib/contracts";
 import { dealHint, useMyDeals } from "@/lib/useMyDeals";
 
-const items = [
+const baseItems = [
   { href: "/#create", label: "Create a link" },
   { href: "/explore", label: "Explore" },
   { href: "/profile", label: "Offer a service" },
@@ -20,12 +22,26 @@ export default function Nav() {
   const { deals } = useMyDeals(address);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
 
+  const refereeQuery = useReadContract({
+    address: ADDRESSES.elyMarket,
+    abi: elyMarketAbi,
+    functionName: "referee",
+    chainId: elysiumTestnet.id,
+  });
+
   useEffect(() => {
     const timer = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 15000);
     return () => clearInterval(timer);
   }, []);
 
   const urgent = deals ? deals.filter((d) => dealHint(d, now).urgent).length : 0;
+  const referee = refereeQuery.data;
+  const isReferee =
+    !!address && !!referee && address.toLowerCase() === referee.toLowerCase();
+
+  const items = isReferee
+    ? [...baseItems.slice(0, 4), { href: "/referee", label: "Referee" }, ...baseItems.slice(4)]
+    : baseItems;
 
   return (
     <>
