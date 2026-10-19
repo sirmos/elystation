@@ -25,6 +25,7 @@ import {
 } from "@/lib/market";
 import { bpsText, useFeeFor } from "@/lib/useDiscount";
 import DurationPicker from "./DurationPicker";
+import LocalPrice from "./LocalPrice";
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
 
@@ -273,7 +274,10 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
   return (
     <div className="hire">
       <div className="hire-head">
-        <h3>Hire for {money(price)} USDC</h3>
+        <h3>
+          Hire for {money(price)} USDC
+          <LocalPrice value={price} />
+        </h3>
         <button className="link-button" onClick={onClose}>
           Close
         </button>

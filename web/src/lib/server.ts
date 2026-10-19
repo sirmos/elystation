@@ -14,7 +14,7 @@ export function adminClient() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-const chainClient = createPublicClient({
+export const chainClient = createPublicClient({
   chain: elysiumTestnet,
   transport: http(),
 });

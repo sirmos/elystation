@@ -20,8 +20,10 @@ import {
   money,
   shortAddress,
 } from "@/lib/market";
+import { bpsText, useFeeFor } from "@/lib/useDiscount";
 import { useDealLog } from "@/lib/useDealLog";
 import DealChat from "./DealChat";
+import LocalPrice from "./LocalPrice";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -62,12 +64,7 @@ export default function DealView({ id }: { id: string }) {
     chainId: elysiumTestnet.id,
   });
 
-  const feeQuery = useReadContract({
-    address: ADDRESSES.elyMarket,
-    abi: elyMarketAbi,
-    functionName: "feeBps",
-    chainId: elysiumTestnet.id,
-  });
+  const fee = useFeeFor(dealQuery.data ? dealQuery.data[1] : undefined);
 
   const refereeQuery = useReadContract({
     address: ADDRESSES.elyMarket,
@@ -151,8 +148,6 @@ export default function DealView({ id }: { id: string }) {
     !!address && !!referee && address.toLowerCase() === referee.toLowerCase();
   const busy = signing || confirming;
   const open = status === 1 || status === 2 || status === 5;
-  const feeText =
-    feeQuery.data !== undefined ? `${Number(feeQuery.data) / 100}%` : "-";
 
   const chatRole = isCustomer
     ? "customer"
@@ -340,6 +335,9 @@ export default function DealView({ id }: { id: string }) {
           {money(amount)}
           <span className="unit">USDC</span>
         </p>
+        <p className="hint">
+          <LocalPrice value={amount} />
+        </p>
 
         {status === 4 ? (
           <p className="outcome outcome-refunded">Refunded to the customer</p>
@@ -407,7 +405,10 @@ export default function DealView({ id }: { id: string }) {
           )}
           <div className="row">
             <dt>Fee when paid out</dt>
-            <dd>{feeText}</dd>
+            <dd>
+              {bpsText(fee.effectiveBps)}
+              {fee.qualifies ? " (provider holds ELYST)" : ""}
+            </dd>
           </div>
         </dl>
 
@@ -451,6 +452,9 @@ export default function DealView({ id }: { id: string }) {
         <div className="actions">
           <Link className="btn btn-secondary btn-sm" href="/dashboard">
             Back to your dashboard
+          </Link>
+          <Link className="btn btn-secondary btn-sm" href="/policies#disputes">
+            Dispute policy
           </Link>
         </div>
       </div>

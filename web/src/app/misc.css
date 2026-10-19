@@ -1,0 +1,52 @@
+.currency-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--on-dark-muted);
+}
+
+.currency-pick select {
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font: inherit;
+}
+
+.currency-pick select option {
+  color: var(--ink);
+}
+
+.footer-note {
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--on-dark-muted);
+  opacity: 0.85;
+}
+
+.footer-note a {
+  text-decoration: underline;
+}
+
+.legal p {
+  margin-top: 10px;
+  font-size: 0.9375rem;
+}
+
+.legal ul {
+  margin: 10px 0 0 18px;
+  list-style: disc;
+  font-size: 0.9375rem;
+}
+
+.legal li + li {
+  margin-top: 6px;
+}
+
+.legal h3 {
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: 700;
+}

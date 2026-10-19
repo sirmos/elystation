@@ -9,6 +9,7 @@ import { ADDRESSES, elyMarketAbi } from "@/lib/contracts";
 import { money, shortAddress } from "@/lib/market";
 import Avatar from "./Avatar";
 import HirePanel from "./HirePanel";
+import LocalPrice from "./LocalPrice";
 
 export default function ProfileView({ address }: { address: Address }) {
   const { address: me } = useAccount();
@@ -196,7 +197,10 @@ export default function ProfileView({ address }: { address: Address }) {
               <div className="svc" key={`${s.title}-${i}`}>
                 <div>
                   <p className="svc-title">{s.title}</p>
-                  <p className="svc-price">{money(s.price)} USDC</p>
+                  <p className="svc-price">
+                    {money(s.price)} USDC
+                    <LocalPrice value={s.price} />
+                  </p>
                 </div>
                 {!isOwner && (
                   <button

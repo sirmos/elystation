@@ -22,11 +22,13 @@ const roadmap = [
     status: "Done",
     items: [
       "Payment links, QR code and WhatsApp sharing",
-      "Pay page and public receipts",
       "Services directory with profiles and unique handles",
       "Pay when done, with disputes and a referee",
       "Private messages, photos and videos for each deal",
-      "Dashboard and a token page with live usage",
+      "Test ELYST token with a live fee benefit",
+      "Prices in your local currency (estimates)",
+      "Telegram and Discord alerts (beta)",
+      "Token page with live usage, and a policies page",
     ],
   },
   {
@@ -34,8 +36,8 @@ const roadmap = [
     phase: "In development",
     status: "Building now",
     items: [
-      "Telegram and Discord alerts, hosted all day",
-      "Prices in your local currency",
+      "Free always-on hosting for the bots",
+      "Signed wallet linking for the bots",
       "Reviews and ratings",
       "A referee panel instead of one wallet",
     ],
@@ -46,8 +48,8 @@ const roadmap = [
     status: "After the build",
     items: [
       "Elystation token (ELYST), launching through Ascend",
-      "Lower fees for token holders",
       "Part of the fees to support the token",
+      "Security review before mainnet",
       "A plugin for AI agents, through PayBox",
     ],
   },

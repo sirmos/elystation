@@ -5,8 +5,10 @@ import "./globals.css";
 import "./market.css";
 import "./chat.css";
 import "./ascend.css";
+import "./misc.css";
 import Providers from "./providers";
 import Header from "@/components/Header";
+import CurrencyPicker from "@/components/CurrencyPicker";
 import { ADDRESSES } from "@/lib/contracts";
 import { BRAND } from "@/lib/brand";
 import { LINKS } from "@/lib/links";
@@ -47,6 +49,7 @@ export default function RootLayout({
               <span className="footer-links">
                 <Link href="/token">Token plan</Link>
                 <Link href="/#roadmap">Roadmap</Link>
+                <Link href="/policies">Policies</Link>
                 <a href={LINKS.discord} target="_blank" rel="noreferrer">
                   Discord
                 </a>
@@ -66,6 +69,14 @@ export default function RootLayout({
                 <a href={LINKS.explorer} target="_blank" rel="noreferrer">
                   Explorer
                 </a>
+              </span>
+              <CurrencyPicker />
+              <span className="footer-note">
+                Prices in other currencies are estimates. Rates from{" "}
+                <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">
+                  Exchange Rate API
+                </a>
+                .
               </span>
             </div>
           </footer>
