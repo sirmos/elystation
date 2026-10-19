@@ -17,6 +17,23 @@
   gap: 8px 22px;
 }
 
+/* More room for the tilted hero cards, so the live note never overlaps them */
+
+.showcase {
+  height: 580px;
+}
+
+.notice-ok {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--mint-soft);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 .ascend {
   margin-top: 104px;
   padding: 56px 48px;
@@ -78,6 +95,9 @@
 }
 
 @media (max-width: 900px) {
+  .showcase {
+    height: auto;
+  }
   .ascend {
     margin-top: 64px;
     padding: 32px 22px;

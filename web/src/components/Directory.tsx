@@ -7,14 +7,18 @@ import { useProfiles } from "@/lib/useProfiles";
 import Avatar from "./Avatar";
 
 export default function Directory() {
-  const { profiles, error } = useProfiles();
+  const { profiles, error, retry } = useProfiles();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
 
-  if (error) {
+  if (!profiles && error) {
     return (
       <div className="empty">
-        We could not load the directory. Refresh the page to try again.
+        <p>We could not load the directory.</p>
+        <p className="hint">{error}</p>
+        <button className="btn btn-secondary" onClick={retry}>
+          Try again
+        </button>
       </div>
     );
   }

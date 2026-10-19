@@ -3,18 +3,20 @@
 import { useEffect, useState } from "react";
 import { usePublicClient } from "wagmi";
 import { elysiumTestnet } from "./chain";
-import { ADDRESSES, DEPLOY_BLOCK, elyPayAbi } from "./contracts";
+import { ADDRESSES, DEPLOY_BLOCK, elyMarketAbi, elyPayAbi } from "./contracts";
 
 export type Activity = {
   links: number;
   payments: number;
+  deals: number;
+  profiles: number;
   volume: bigint;
   latest: { amount: bigint; fee: bigint; memo: string } | null;
 };
 
-// Reads link and payment events from the ElyPay contract.
-// Returns null when nothing can be read, so the page can show an example.
-// It refreshes every 10 seconds and when the tab becomes visible again.
+// Reads link, payment, deal and profile events from the contracts.
+// If one refresh fails, it keeps the last good numbers.
+// Returns null only if nothing has ever loaded, so the page can show an example.
 export function useActivity() {
   const client = usePublicClient({ chainId: elysiumTestnet.id });
   const [data, setData] = useState<Activity | null>(null);
@@ -26,23 +28,45 @@ export function useActivity() {
 
     async function load() {
       try {
-        const created = await c!.getContractEvents({
-          address: ADDRESSES.elyPay,
-          abi: elyPayAbi,
-          eventName: "LinkCreated",
-          fromBlock: DEPLOY_BLOCK,
-          toBlock: "latest",
-        });
-        const paid = await c!.getContractEvents({
-          address: ADDRESSES.elyPay,
-          abi: elyPayAbi,
-          eventName: "Paid",
-          fromBlock: DEPLOY_BLOCK,
-          toBlock: "latest",
-        });
+        const [created, paid, deals, profiles] = await Promise.all([
+          c!.getContractEvents({
+            address: ADDRESSES.elyPay,
+            abi: elyPayAbi,
+            eventName: "LinkCreated",
+            fromBlock: DEPLOY_BLOCK,
+            toBlock: "latest",
+          }),
+          c!.getContractEvents({
+            address: ADDRESSES.elyPay,
+            abi: elyPayAbi,
+            eventName: "Paid",
+            fromBlock: DEPLOY_BLOCK,
+            toBlock: "latest",
+          }),
+          c!.getContractEvents({
+            address: ADDRESSES.elyMarket,
+            abi: elyMarketAbi,
+            eventName: "DealCreated",
+            fromBlock: DEPLOY_BLOCK,
+            toBlock: "latest",
+          }),
+          c!.getContractEvents({
+            address: ADDRESSES.elyMarket,
+            abi: elyMarketAbi,
+            eventName: "ProfileSet",
+            fromBlock: DEPLOY_BLOCK,
+            toBlock: "latest",
+          }),
+        ]);
 
         let volume = BigInt(0);
         for (const p of paid) volume += p.args.amount ?? BigInt(0);
+        for (const d of deals) volume += d.args.amount ?? BigInt(0);
+
+        const people = new Set<string>();
+        for (const p of profiles) {
+          if (p.args.provider) people.add(p.args.provider.toLowerCase());
+        }
 
         let latest: Activity["latest"] = null;
         const last = paid[paid.length - 1];
@@ -61,10 +85,17 @@ export function useActivity() {
         }
 
         if (!cancelled) {
-          setData({ links: created.length, payments: paid.length, volume, latest });
+          setData({
+            links: created.length,
+            payments: paid.length,
+            deals: deals.length,
+            profiles: people.size,
+            volume,
+            latest,
+          });
         }
       } catch {
-        if (!cancelled) setData(null);
+        // Keep showing the last good numbers.
       }
     }
 
@@ -73,7 +104,7 @@ export function useActivity() {
     }
 
     load();
-    const timer = setInterval(load, 10000);
+    const timer = setInterval(load, 15000);
     document.addEventListener("visibilitychange", onVisible);
 
     return () => {

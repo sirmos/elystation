@@ -76,9 +76,12 @@ function FeeBenefit() {
 
   const busy = signing || confirming;
   const wrongChain = isConnected && chainId !== elysiumTestnet.id;
+  const claimed = receipt?.status === "success";
+  const failed = receipt?.status === "reverted";
   const errorText =
     localError ||
-    (writeError instanceof BaseError ? writeError.shortMessage : "");
+    (writeError instanceof BaseError ? writeError.shortMessage : "") ||
+    (failed ? "The transaction failed. Try again." : "");
 
   async function getTokens() {
     setLocalError("");
@@ -140,6 +143,13 @@ function FeeBenefit() {
               </>
             )}
           </dl>
+
+          {claimed && (
+            <p className="notice-ok" role="status">
+              Done. 1,000 test ELYST has been sent to your wallet. Your fee as a
+              provider is now {bpsText(fee.effectiveBps)}.
+            </p>
+          )}
 
           {errorText && (
             <p className="notice" role="alert" style={{ marginTop: 14 }}>
@@ -314,7 +324,7 @@ export default function TokenView() {
         <h2>Not built yet</h2>
         <p className="panel-note">
           Using part of the fees to support the token needs the Ascend pool
-          interface, so it is not built. The real token needs Elysium mainnet
+          interface, so it is not built. The live token needs Elysium mainnet
           and the Ascend launch. We will not claim either until they work.
         </p>
       </div>

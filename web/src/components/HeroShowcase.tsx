@@ -25,10 +25,13 @@ export default function HeroShowcase() {
   const memo = latest ? latest.memo || "No description" : "Logo design";
   const fee = latest ? `${money(latest.fee)} USDC` : "0.25 USDC";
 
-  const note =
-    activity && activity.payments > 0
-      ? `Live from Elysium testnet: ${count(activity.links, "link", "links")}, ${count(activity.payments, "payment", "payments")}, ${money(activity.volume)} test USDC`
-      : "Example";
+  const hasActivity =
+    !!activity &&
+    (activity.payments > 0 || activity.deals > 0 || activity.profiles > 0);
+
+  const note = hasActivity
+    ? `Live from Elysium testnet: ${count(activity.payments, "payment", "payments")}, ${count(activity.deals, "service deal", "service deals")}, ${count(activity.profiles, "profile", "profiles")}, ${money(activity.volume)} test USDC`
+    : "Example";
 
   return (
     <div>
@@ -92,7 +95,7 @@ export default function HeroShowcase() {
       <p
         style={{
           position: "relative",
-          marginTop: 56,
+          marginTop: 24,
           textAlign: "right",
           fontSize: "0.75rem",
           color: "var(--on-dark-muted)",
