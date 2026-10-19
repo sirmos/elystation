@@ -1,0 +1,9 @@
+{
+  "network": "elysiumTestnet",
+  "chainId": 99801,
+  "elyst": "0x83302446E2CCDE23fa727df984FB0e7483e6148e",
+  "market": "0x446d38615086cbD9DF9678B9C298E5181d1D14aC",
+  "minBalance": "100 ELYST",
+  "discountFeeBps": 20,
+  "deployedAt": "2026-10-19T05:37:18.161Z"
+}

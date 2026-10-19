@@ -4,12 +4,13 @@ import type { Address } from "viem";
 export const ADDRESSES = {
   usdc: "0x4CD746962FEFEFfa2fcc5cced7B27BC47FE3890B" as Address,
   elyPay: "0x68Aa5b7A6A755b2FcfB1a94E253E4Ab92Ad9cBb4" as Address,
-  // Paste the ElyMarketV2 address from the deploy here.
-  // The old ElyMarket (version 1) was 0x89A9300104aeeDaD36FFd82E8E6defD3fa622011.
   elyMarket: "0x446d38615086cbD9DF9678B9C298E5181d1D14aC" as Address,
+  // Paste the test ELYST address from deployElyst.js here.
+  elyst: "0x83302446E2CCDE23fa727df984FB0e7483e6148e" as Address,
 };
 
 export const USDC_DECIMALS = 6;
+export const ELYST_DECIMALS = 18;
 
 // Block where the contracts were created. Zero works on this network.
 export const DEPLOY_BLOCK = BigInt(0);
@@ -52,6 +53,9 @@ export const elyMarketAbi = parseAbi([
   "function minReview() view returns (uint64)",
   "function maxReview() view returns (uint64)",
   "function resolveWindow() view returns (uint64)",
+  "function discountToken() view returns (address)",
+  "function discountMinBalance() view returns (uint256)",
+  "function discountFeeBps() view returns (uint16)",
   "event ProfileSet(address indexed provider, string name, string headline, string category, string city)",
   "event DealCreated(uint256 indexed id, address indexed customer, address indexed provider, uint256 amount, uint64 deadline, string title)",
   "event DisputeOpened(uint256 indexed id, address indexed customer, string reason)",
@@ -63,5 +67,10 @@ export const usdcAbi = parseAbi([
   "function faucet()",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function allowance(address owner, address spender) view returns (uint256)",
+  "function balanceOf(address account) view returns (uint256)",
+]);
+
+export const elystAbi = parseAbi([
+  "function faucet()",
   "function balanceOf(address account) view returns (uint256)",
 ]);

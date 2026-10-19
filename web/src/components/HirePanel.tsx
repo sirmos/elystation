@@ -23,6 +23,7 @@ import {
   formatDuration,
   money,
 } from "@/lib/market";
+import { bpsText, useFeeFor } from "@/lib/useDiscount";
 import DurationPicker from "./DurationPicker";
 
 const ZERO = "0x0000000000000000000000000000000000000000" as const;
@@ -47,6 +48,7 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
   const { connect, connectors, isPending: connecting } = useConnect();
   const { switchChain, isPending: switching } = useSwitchChain();
   const publicClient = usePublicClient({ chainId: elysiumTestnet.id });
+  const fee = useFeeFor(provider);
 
   const [deadlineSeconds, setDeadlineSeconds] = useState(604800);
   const [review, setReview] = useState<number | null>(null);
@@ -69,13 +71,6 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
     args: [address ?? ZERO, ADDRESSES.elyMarket],
     chainId: elysiumTestnet.id,
     query: { enabled: !!address },
-  });
-
-  const feeQuery = useReadContract({
-    address: ADDRESSES.elyMarket,
-    abi: elyMarketAbi,
-    functionName: "feeBps",
-    chainId: elysiumTestnet.id,
   });
 
   const minQuery = useReadContract({
@@ -141,8 +136,6 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
   const wrongChain = isConnected && chainId !== elysiumTestnet.id;
   const busy = signing || confirming;
   const busyLabel = signing ? "Confirm in your wallet" : "Waiting for confirmation";
-  const feeText =
-    feeQuery.data !== undefined ? `${Number(feeQuery.data) / 100}%` : "-";
 
   const errorText =
     localError ||
@@ -316,7 +309,7 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
         </div>
         <div className="row">
           <dt>Fee when paid out</dt>
-          <dd>{feeText}</dd>
+          <dd>{bpsText(fee.effectiveBps)}</dd>
         </div>
         <div className="row">
           <dt>Deadline to deliver</dt>
@@ -327,6 +320,13 @@ export default function HirePanel({ provider, title, price, onClose }: Props) {
           <dd>{formatDuration(chosen)}</dd>
         </div>
       </dl>
+
+      {fee.qualifies && (
+        <p className="hint">
+          Lower fee: this provider holds ELYST, so the fee is {bpsText(fee.discountBps)}{" "}
+          instead of {bpsText(fee.baseBps)}.
+        </p>
+      )}
 
       <div className="pay-actions">
         {errorText && (
