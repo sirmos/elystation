@@ -18,7 +18,7 @@ Ascend launches tokens on Elysium and supports them after launch. Elystation is 
 - **Usage anyone can check.** Every payment and job is public on the chain. The token page on the site shows live numbers such as unique wallets and volume.
 - **Built for the lifecycle.** Launch, Ascended, HyperCore spot, then HIP-3. We plan to publish our allocation before launch and to use the creator fee option to set funds aside for a listing.
 
-Token (draft): name Elystation, ticker ELYST, 1,000,000,000 fixed supply, launching through Ascend in a USDC pool. A test version is live on testnet: providers who hold 100 test ELYST pay 0.2% instead of 0.5% on services. This is built into the services contract. The real token is not launched, and we make no promises about price or returns.
+Token (draft): name Elystation, ticker ELYST, 1,000,000,000 fixed supply, launching through Ascend in a USDC pool. A test version is live on testnet: providers who hold 100 test ELYST pay 0.2% instead of 0.5% on services. This is built into the services contract. The token itself is not launched, and we make no promises about price or returns.
 
 ## What works today
 
@@ -40,21 +40,22 @@ Other
 - Token page with the plan, the live fee benefit and live usage numbers.
 - Prices in your local currency (estimates), picked in the footer.
 - Policies page: referee policy, terms and privacy.
-- Telegram and Discord alert bots (beta): alerts, reminders, and commands to look up deals.
+- Telegram and Discord bots that run on free serverless hosting, so no computer has to stay on. Commands to look up deals, and alerts and reminders.
 - A 0.5% fee, set in the contracts (maximum 1%).
+- 46 automated contract tests.
 
 ## In development
 
-- Free always-on hosting for the bots (serverless, see below).
 - Signed wallet linking for the bots.
 - Reviews and ratings.
 - A referee panel instead of one wallet.
+- More tests and a closer look at every contract function.
 
 ## Planned
 
 - Token launch through Ascend.
 - Using part of the fees to support the token, once Ascend shares the pool interface.
-- A security review before mainnet.
+- An independent security audit before mainnet.
 - A plugin so AI agents can create and pay links, through PayBox.
 
 ## Not built yet
@@ -80,7 +81,7 @@ The contracts have automated tests but have not been audited. Do not use them wi
 - Contracts: Solidity 0.8.24, Hardhat, OpenZeppelin
 - Web: Next.js, TypeScript, wagmi, viem
 - Messages, files and bot data: Supabase (database and storage)
-- Bots: run inside the website as serverless routes. Telegram and Discord call the site, and a free timer calls the scan route about once a minute.
+- Bots: serverless routes inside the website. Telegram and Discord call the site, and a free timer calls the scan route about once a minute.
 - Hosting: Vercel
 
 ## Run it yourself
@@ -104,9 +105,9 @@ npm run dev
 
 For messages, files and the bots, create `web/.env.local` with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`. Without them, everything else still works and the message panel says it is not set up.
 
-Bot setup (serverless): add `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `DISCORD_BOT_TOKEN`, `DISCORD_PUBLIC_KEY`, `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID` and `CRON_SECRET` in the hosting settings. Set the Telegram webhook to `/api/telegram`, the Discord interactions address to `/api/discord`, and point a free timer at `/api/cron/scan?secret=...`.
+Bot setup: add `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `DISCORD_BOT_TOKEN`, `DISCORD_PUBLIC_KEY`, `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID` and `CRON_SECRET` in the hosting settings. Set the Telegram webhook to `/api/telegram`, the Discord interactions address to `/api/discord`, and point a free timer at `/api/cron/scan?secret=...`. Never commit these values.
 
-There is also a local version of the bots in `bots/` that runs on your own computer with `npm start`.
+There is also a local version of the bots in `bots/` that runs on your own computer with `npm start`. Stop it if you use the webhook, because Telegram can only send updates to one place.
 
 ## Repo layout
 
