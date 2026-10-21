@@ -12,7 +12,8 @@ import {
 import { BaseError } from "viem";
 import type { Address } from "viem";
 import { elysiumTestnet } from "@/lib/chain";
-import { ADDRESSES, DEPLOY_BLOCK, elyMarketAbi } from "@/lib/contracts";
+import { ADDRESSES, elyMarketAbi } from "@/lib/contracts";
+import { fetchEvents } from "@/lib/events";
 import { feeOverrides } from "@/lib/gas";
 import { formatDate, money, shortAddress } from "@/lib/market";
 import { useDealLog } from "@/lib/useDealLog";
@@ -43,17 +44,11 @@ function useOpenDisputes(tick: number) {
 
     async function load() {
       try {
-        const logs = await c!.getContractEvents({
-          address: ADDRESSES.elyMarket,
-          abi: elyMarketAbi,
-          eventName: "DisputeOpened",
-          fromBlock: DEPLOY_BLOCK,
-          toBlock: "latest",
-        });
+        const events = await fetchEvents("market", "DisputeOpened");
 
         const ids = new Map<string, bigint>();
-        for (const l of logs) {
-          if (l.args.id !== undefined) ids.set(l.args.id.toString(), l.args.id);
+        for (const e of events) {
+          if (e.args.id !== undefined) ids.set(e.args.id, BigInt(e.args.id));
         }
 
         const all = await Promise.all(

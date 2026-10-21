@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { usePublicClient } from "wagmi";
 import type { Address } from "viem";
 import { elysiumTestnet } from "./chain";
-import { ADDRESSES, DEPLOY_BLOCK, elyMarketAbi } from "./contracts";
+import { ADDRESSES, elyMarketAbi } from "./contracts";
+import { fetchEvents } from "./events";
 
 export type MyDeal = {
   id: bigint;
@@ -79,29 +80,13 @@ export function useMyDeals(address?: Address) {
     async function load() {
       try {
         const [asProvider, asCustomer] = await Promise.all([
-          c!.getContractEvents({
-            address: ADDRESSES.elyMarket,
-            abi: elyMarketAbi,
-            eventName: "DealCreated",
-            args: { provider: me },
-            fromBlock: DEPLOY_BLOCK,
-            toBlock: "latest",
-          }),
-          c!.getContractEvents({
-            address: ADDRESSES.elyMarket,
-            abi: elyMarketAbi,
-            eventName: "DealCreated",
-            args: { customer: me },
-            fromBlock: DEPLOY_BLOCK,
-            toBlock: "latest",
-          }),
+          fetchEvents("market", "DealCreated", { provider: me.toLowerCase() }),
+          fetchEvents("market", "DealCreated", { customer: me.toLowerCase() }),
         ]);
 
         const ids = new Map<string, bigint>();
-        for (const log of [...asProvider, ...asCustomer]) {
-          if (log.args.id !== undefined) {
-            ids.set(log.args.id.toString(), log.args.id);
-          }
+        for (const e of [...asProvider, ...asCustomer]) {
+          if (e.args.id !== undefined) ids.set(e.args.id, BigInt(e.args.id));
         }
 
         const list = await Promise.all(

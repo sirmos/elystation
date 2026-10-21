@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { usePublicClient } from "wagmi";
 import type { Address } from "viem";
 import { elysiumTestnet } from "./chain";
-import { ADDRESSES, DEPLOY_BLOCK, elyPayAbi } from "./contracts";
+import { ADDRESSES, elyPayAbi } from "./contracts";
+import { fetchEvents } from "./events";
 
 export type MyLink = {
   id: bigint;
@@ -29,18 +30,13 @@ export function useMyLinks(address?: Address) {
 
     async function load() {
       try {
-        const logs = await c!.getContractEvents({
-          address: ADDRESSES.elyPay,
-          abi: elyPayAbi,
-          eventName: "LinkCreated",
-          args: { owner: me },
-          fromBlock: DEPLOY_BLOCK,
-          toBlock: "latest",
+        const events = await fetchEvents("pay", "LinkCreated", {
+          owner: me.toLowerCase(),
         });
 
         const list = await Promise.all(
-          logs.map(async (log) => {
-            const id = log.args.id as bigint;
+          events.map(async (e) => {
+            const id = BigInt(e.args.id);
             const l = await c!.readContract({
               address: ADDRESSES.elyPay,
               abi: elyPayAbi,

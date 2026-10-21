@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { formatUnits, isAddress, parseAbi } from "viem";
-import { chainClient } from "@/lib/server";
+import { adminClient, chainClient } from "@/lib/server";
 import { ADDRESSES, elyPayAbi, usdcAbi } from "@/lib/contracts";
 import {
   getState,
@@ -97,26 +97,32 @@ async function jobsFor(address: string) {
     .reverse();
 }
 
+// Payment links come from our own index, not from a search of the whole chain.
 async function payLinksFor(address: string) {
-  const logs = await chainClient.getContractEvents({
-    address: ADDRESSES.elyPay,
-    abi: elyPayAbi,
-    eventName: "LinkCreated",
-    args: { owner: address as `0x${string}` },
-    fromBlock: BigInt(0),
-    toBlock: "latest",
-  });
+  const db = adminClient();
+  if (!db) return [];
+
+  const { data } = await db
+    .from("chain_events")
+    .select("args")
+    .eq("contract", "pay")
+    .eq("event", "LinkCreated")
+    .contains("args", { owner: address.toLowerCase() })
+    .order("block_number", { ascending: false })
+    .limit(8);
+
   const out: any[] = [];
-  for (const l of logs) {
+  for (const row of data ?? []) {
+    const id = BigInt(row.args.id);
     const r = await chainClient.readContract({
       address: ADDRESSES.elyPay,
       abi: elyPayAbi,
       functionName: "links",
-      args: [l.args.id as bigint],
+      args: [id],
     });
-    out.push({ id: l.args.id, amount: r[1], payments: r[3], received: r[4], memo: r[5] });
+    out.push({ id, amount: r[1], payments: r[3], received: r[4], memo: r[5] });
   }
-  return out.reverse();
+  return out;
 }
 
 function dealLine(d: Awaited<ReturnType<typeof getDeal>>, me: string) {
@@ -191,7 +197,7 @@ export async function handleCommand(
   if (name === "links") {
     const lines: string[] = [];
     for (const w of wallets) {
-      for (const l of (await payLinksFor(w)).slice(0, 8)) {
+      for (const l of await payLinksFor(w)) {
         lines.push(
           `#${l.id} ${l.memo || "No description"}, ${l.amount > BigInt(0) ? usd(l.amount) + " USDC" : "payer chooses"}, ${l.payments} payments, ${usd(l.received)} USDC received\n${SITE}/pay/${l.id}`
         );
